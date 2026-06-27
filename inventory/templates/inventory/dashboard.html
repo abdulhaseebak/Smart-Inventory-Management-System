@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans,system-ui,sans-serif);background:var(--surface-0,#f5f5f3);color:var(--text-primary,#1a1a18);font-size:14px;min-height:100vh}
+
+/* Layout */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--surface-2,#fff);border-right:0.5px solid var(--border,rgba(0,0,0,.12));display:flex;flex-direction:column;overflow:hidden}
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+
+/* Sidebar */
+.logo{padding:18px 16px 14px;border-bottom:0.5px solid var(--border,rgba(0,0,0,.12));}
+.logo-title{font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:#185FA5;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.logo-sub{font-size:11px;color:var(--text-muted,#888);margin-top:2px}
+.nav{padding:10px 8px;flex:1}
+.nav-section{font-size:10px;color:var(--text-muted,#888);text-transform:uppercase;letter-spacing:.08em;padding:10px 8px 4px;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text-secondary,#555);margin-bottom:1px;transition:background .1s}
+.nav-item:hover{background:var(--surface-1,#f5f5f3)}
+.nav-item.active{background:var(--bg-accent,#e6f1fb);color:var(--text-accent,#185FA5);font-weight:500}
+.nav-item i{font-size:16px;width:18px;text-align:center}
+.user-area{padding:12px 8px;border-top:0.5px solid var(--border,rgba(0,0,0,.12))}
+.user-card{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:6px}
+.avatar{width:30px;height:30px;border-radius:50%;background:#185FA5;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:500;flex-shrink:0}
+.user-info .name{font-size:12px;font-weight:500}
+.user-info .role{font-size:11px;color:var(--text-muted,#888)}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--surface-2,#fff);border-bottom:0.5px solid var(--border,rgba(0,0,0,.12));flex-shrink:0}
+.page-title{font-size:17px;font-weight:500}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.search-box{display:flex;align-items:center;gap:7px;border:0.5px solid var(--border-strong,rgba(0,0,0,.2));border-radius:7px;padding:6px 10px;background:var(--surface-1,#f5f5f3);font-size:13px;color:var(--text-secondary,#555);cursor:text;min-width:200px}
+.search-box input{border:none;background:transparent;outline:none;font-size:13px;color:var(--text-primary,#1a1a18);width:100%}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border-strong,rgba(0,0,0,.2));background:transparent;color:var(--text-primary,#1a1a18);transition:background .1s}
+.btn:hover{background:var(--surface-1,#f5f5f3)}
+.btn-primary{background:#185FA5;color:#fff;border-color:#185FA5}
+.btn-primary:hover{background:#0C447C}
+.btn-danger{background:#A32D2D;color:#fff;border-color:#A32D2D}
+.btn-danger:hover{background:#791F1F}
+.btn-sm{padding:5px 10px;font-size:12px}
+
+/* Content */
+.content{padding:24px;flex:1}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:15px;font-weight:500}
+
+/* Stat cards */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface-2,#fff);border:0.5px solid var(--border,rgba(0,0,0,.12));border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:4px}
+.stat-label{font-size:12px;color:var(--text-muted,#888)}
+.stat-value{font-size:24px;font-weight:500;line-height:1.2}
+.stat-sub{font-size:11px;display:flex;align-items:center;gap:4px}
+.stat-up{color:#3B6D11}
+.stat-down{color:#A32D2D}
+.stat-neutral{color:var(--text-muted,#888)}
+.stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.si-blue{background:#E6F1FB;color:#185FA5}
+.si-green{background:#EAF3DE;color:#3B6D11}
+.si-amber{background:#FAEEDA;color:#854F0B}
+.si-red{background:#FCEBEB;color:#A32D2D}
+
+/* Table */
+.table-card{background:var(--surface-2,#fff);border:0.5px solid var(--border,rgba(0,0,0,.12));border-radius:10px;overflow:hidden}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:0.5px solid var(--border,rgba(0,0,0,.12))}
+.filter-row{display:flex;align-items:center;gap:8px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500}
+.badge-green{background:#EAF3DE;color:#27500A}
+.badge-red{background:#FCEBEB;color:#791F1F}
+.badge-amber{background:#FAEEDA;color:#633806}
+.badge-blue{background:#E6F1FB;color:#0C447C}
+.badge-gray{background:#F1EFE8;color:#444441}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:500;color:var(--text-muted,#888);text-transform:uppercase;letter-spacing:.05em;padding:10px 16px;text-align:left;border-bottom:0.5px solid var(--border,rgba(0,0,0,.12));background:var(--surface-1,#f5f5f3)}
+td{padding:11px 16px;border-bottom:0.5px solid var(--border,rgba(0,0,0,.08));font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface-1,#f5f5f3)}
+.action-btns{display:flex;gap:6px}
+
+/* Forms / Modals */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--surface-2,#fff);border-radius:12px;width:520px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;border-bottom:0.5px solid var(--border,rgba(0,0,0,.12))}
+.modal-title{font-size:16px;font-weight:500}
+.modal-body{padding:20px 22px}
+.modal-footer{padding:14px 22px;border-top:0.5px solid var(--border,rgba(0,0,0,.12));display:flex;justify-content:flex-end;gap:8px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row.single{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+label{font-size:12px;font-weight:500;color:var(--text-secondary,#555)}
+input,select,textarea{border:0.5px solid var(--border-strong,rgba(0,0,0,.2));border-radius:6px;padding:8px 10px;font-size:13px;background:var(--surface-1,#f5f5f3);color:var(--text-primary,#1a1a18);outline:none;width:100%;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:#185FA5;box-shadow:0 0 0 2px rgba(24,95,165,.12)}
+
+/* Charts */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.chart-card{background:var(--surface-2,#fff);border:0.5px solid var(--border,rgba(0,0,0,.12));border-radius:10px;padding:18px}
+.chart-title{font-size:13px;font-weight:500;margin-bottom:14px;color:var(--text-secondary,#555)}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px}
+.bar-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.bar{background:#185FA5;border-radius:3px 3px 0 0;width:100%;transition:height .3s;min-height:4px}
+.bar-label{font-size:10px;color:var(--text-muted,#888)}
+.bar-val{font-size:10px;font-weight:500;color:var(--text-secondary,#555)}
+.donut-legend{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-label{color:var(--text-secondary,#555);flex:1}
+.legend-pct{font-weight:500;color:var(--text-primary,#1a1a18)}
+
+/* Alert banner */
+.alert{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:18px;font-size:13px}
+.alert-warning{background:#FAEEDA;color:#633806;border:0.5px solid #EF9F27}
+.alert-danger{background:#FCEBEB;color:#791F1F;border:0.5px solid #F09595}
+
+/* Stock level mini-bar */
+.stock-bar-wrap{display:flex;align-items:center;gap:8px}
+.stock-bar-bg{height:5px;background:var(--surface-1,#f0f0ee);border-radius:3px;flex:1}
+.stock-bar-fill{height:5px;border-radius:3px}
+.stock-qty{font-size:12px;color:var(--text-secondary,#555);min-width:30px}
+
+/* Low stock list */
+.low-stock-list{display:flex;flex-direction:column;gap:0}
+.ls-item{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:0.5px solid var(--border,rgba(0,0,0,.08))}
+.ls-item:last-child{border-bottom:none}
+.ls-name{font-size:13px;font-weight:500}
+.ls-sku{font-size:11px;color:var(--text-muted,#888)}
+.ls-stock{font-size:13px;font-weight:500;color:#A32D2D}
+.ls-threshold{font-size:11px;color:var(--text-muted,#888)}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface-2,#fff);border:0.5px solid var(--border,rgba(0,0,0,.12));border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:8px;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.12);animation:slideIn .2s ease}
+.toast-success{border-left:3px solid #3B6D11;color:#3B6D11}
+.toast-error{border-left:3px solid #A32D2D;color:#A32D2D}
+@keyframes slideIn{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Login */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--surface-0,#f5f5f3)}
+.login-card{background:var(--surface-2,#fff);border:0.5px solid var(--border,rgba(0,0,0,.12));border-radius:14px;padding:40px;width:380px;max-width:95vw}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.login-icon{width:40px;height:40px;background:#185FA5;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.login-title{font-size:20px;font-weight:500}
+.login-sub{font-size:13px;color:var(--text-muted,#888)}
+.login-form{display:flex;flex-direction:column;gap:14px}
+.login-btn{padding:10px;font-size:14px;font-weight:500}
+.demo-hint{margin-top:14px;padding:10px 12px;background:var(--surface-1,#f5f5f3);border-radius:7px;font-size:12px;color:var(--text-secondary,#555)}
+
+/* Report */
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.report-card{background:var(--surface-2,#fff);border:0.5px solid var(--border,rgba(0,0,0,.12));border-radius:10px;padding:16px}
+.report-card h4{font-size:13px;font-weight:500;margin-bottom:10px;color:var(--text-secondary,#555)}
+.report-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--border,rgba(0,0,0,.06));font-size:12px}
+.report-row:last-child{border-bottom:none}
+.report-key{color:var(--text-muted,#888)}
+.report-val{font-weight:500}
+select.filter-select{width:auto;padding:5px 8px;font-size:12px}
+.pagination{display:flex;align-items:center;gap:4px;padding:10px 16px}
+.page-btn{padding:5px 9px;border:0.5px solid var(--border,rgba(0,0,0,.12));border-radius:5px;font-size:12px;cursor:pointer;background:transparent;color:var(--text-secondary,#555)}
+.page-btn:hover{background:var(--surface-1,#f5f5f3)}
+.page-btn.active{background:#185FA5;color:#fff;border-color:#185FA5}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script>
+const {useState,useEffect,useRef,useCallback}=React;
+
+// ── Initial Data ──────────────────────────────────────────────
+const INIT_PRODUCTS=[
+  {id:1,name:"Wireless Keyboard",sku:"WK-001",category:"Electronics",supplier:"TechSupply Co.",price:49.99,costPrice:28.00,stock:85,threshold:20,unit:"pcs"},
+  {id:2,name:"USB-C Hub",sku:"UH-002",category:"Electronics",supplier:"TechSupply Co.",price:34.99,costPrice:18.50,stock:12,threshold:15,unit:"pcs"},
+  {id:3,name:"Office Chair",sku:"OC-003",category:"Furniture",supplier:"FurniturePlus",price:299.99,costPrice:180.00,stock:8,threshold:5,unit:"pcs"},
+  {id:4,name:"A4 Paper (500 sheets)",sku:"AP-004",category:"Stationery",supplier:"PaperMill Ltd.",price:8.99,costPrice:4.50,stock:240,threshold:50,unit:"reams"},
+  {id:5,name:"Ballpoint Pens (12pk)",sku:"BP-005",category:"Stationery",supplier:"PaperMill Ltd.",price:6.49,costPrice:2.80,stock:4,threshold:10,unit:"packs"},
+  {id:6,name:"Monitor 27\"",sku:"MN-006",category:"Electronics",supplier:"TechSupply Co.",price:399.99,costPrice:240.00,stock:22,threshold:10,unit:"pcs"},
+  {id:7,name:"Standing Desk",sku:"SD-007",category:"Furniture",supplier:"FurniturePlus",price:599.99,costPrice:360.00,stock:6,threshold:3,unit:"pcs"},
+  {id:8,name:"Laptop Bag",sku:"LB-008",category:"Accessories",supplier:"BagWorld",price:59.99,costPrice:28.00,stock:33,threshold:10,unit:"pcs"},
+  {id:9,name:"Webcam HD",sku:"WC-009",category:"Electronics",supplier:"TechSupply Co.",price:89.99,costPrice:52.00,stock:18,threshold:10,unit:"pcs"},
+  {id:10,name:"Desk Lamp",sku:"DL-010",category:"Accessories",supplier:"LightCo",price:44.99,costPrice:22.00,stock:27,threshold:8,unit:"pcs"},
+];
+const INIT_SUPPLIERS=[
+  {id:1,name:"TechSupply Co.",contact:"tech@techsupply.com",phone:"+1-555-0101",city:"San Francisco"},
+  {id:2,name:"FurniturePlus",contact:"orders@furnitureplus.com",phone:"+1-555-0202",city:"Chicago"},
+  {id:3,name:"PaperMill Ltd.",contact:"sales@papermill.com",phone:"+1-555-0303",city:"Boston"},
+  {id:4,name:"BagWorld",contact:"bags@bagworld.com",phone:"+1-555-0404",city:"Austin"},
+  {id:5,name:"LightCo",contact:"hello@lightco.com",phone:"+1-555-0505",city:"Seattle"},
+];
+const INIT_PURCHASES=[
+  {id:1,date:"2025-06-01",supplier:"TechSupply Co.",product:"Wireless Keyboard",qty:50,unitCost:28.00,total:1400.00,status:"received"},
+  {id:2,date:"2025-06-05",supplier:"PaperMill Ltd.",product:"A4 Paper (500 sheets)",qty:100,unitCost:4.50,total:450.00,status:"received"},
+  {id:3,date:"2025-06-10",supplier:"FurniturePlus",product:"Office Chair",qty:5,unitCost:180.00,total:900.00,status:"pending"},
+  {id:4,date:"2025-06-14",supplier:"TechSupply Co.",product:"Monitor 27\"",qty:10,unitCost:240.00,total:2400.00,status:"received"},
+  {id:5,date:"2025-06-18",supplier:"BagWorld",product:"Laptop Bag",qty:20,unitCost:28.00,total:560.00,status:"transit"},
+];
+const INIT_SALES=[
+  {id:1,date:"2025-06-02",product:"Wireless Keyboard",qty:5,unitPrice:49.99,total:249.95,customer:"Acme Corp"},
+  {id:2,date:"2025-06-06",product:"Monitor 27\"",qty:2,unitPrice:399.99,total:799.98,customer:"Beta LLC"},
+  {id:3,date:"2025-06-08",product:"Office Chair",qty:3,unitPrice:299.99,total:899.97,customer:"Gamma Inc"},
+  {id:4,date:"2025-06-12",product:"A4 Paper (500 sheets)",qty:20,unitPrice:8.99,total:179.80,customer:"Delta Co"},
+  {id:5,date:"2025-06-15",product:"USB-C Hub",qty:8,unitPrice:34.99,total:279.92,customer:"Epsilon Ltd"},
+  {id:6,date:"2025-06-20",product:"Laptop Bag",qty:4,unitPrice:59.99,total:239.96,customer:"Zeta Partners"},
+];
+
+// ── Helpers ───────────────────────────────────────────────────
+function fmt(n){return'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+function useStore(key,init){
+  const [v,setV]=useState(()=>{try{const s=localStorage.getItem(key);return s?JSON.parse(s):init}catch{return init}});
+  const set=useCallback(val=>{setV(p=>{const nv=typeof val==='function'?val(p):val;try{localStorage.setItem(key,JSON.stringify(nv))}catch{}return nv});},[key]);
+  return[v,set];
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function Toast({msg,type,onDone}){
+  useEffect(()=>{const t=setTimeout(onDone,2500);return()=>clearTimeout(t)},[onDone]);
+  return React.createElement('div',{className:`toast toast-${type}`},
+    React.createElement('i',{className:`ti ti-${type==='success'?'circle-check':'alert-circle'}`}),msg
+  );
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function Modal({title,onClose,children,footer}){
+  return React.createElement('div',{className:'overlay',onClick:e=>{if(e.target===e.currentTarget)onClose()}},
+    React.createElement('div',{className:'modal'},
+      React.createElement('div',{className:'modal-header'},
+        React.createElement('div',{className:'modal-title'},title),
+        React.createElement('button',{className:'btn btn-sm',onClick:onClose},React.createElement('i',{className:'ti ti-x'}))
+      ),
+      React.createElement('div',{className:'modal-body'},children),
+      footer&&React.createElement('div',{className:'modal-footer'},footer)
+    )
+  );
+}
+
+// ── Login ─────────────────────────────────────────────────────
+function Login({onLogin}){
+  const [email,setEmail]=useState('admin@inventory.com');
+  const [pass,setPass]=useState('admin123');
+  const [err,setErr]=useState('');
+  const submit=()=>{
+    if(email==='admin@inventory.com'&&pass==='admin123')onLogin({name:'Admin User',role:'Administrator',email});
+    else if(email==='staff@inventory.com'&&pass==='staff123')onLogin({name:'Staff User',role:'Staff',email});
+    else setErr('Invalid credentials. Use demo accounts below.');
+  };
+  return React.createElement('div',{className:'login-page'},
+    React.createElement('div',{className:'login-card'},
+      React.createElement('div',{className:'login-logo'},
+        React.createElement('div',{className:'login-icon'},React.createElement('i',{className:'ti ti-package'})),
+        React.createElement('div',null,
+          React.createElement('div',{className:'login-title'},'InvenFlow'),
+          React.createElement('div',{className:'login-sub'},'Smart Inventory Management')
+        )
+      ),
+      err&&React.createElement('div',{className:'alert alert-danger',style:{marginBottom:'14px'}},React.createElement('i',{className:'ti ti-alert-circle'}),err),
+      React.createElement('div',{className:'login-form'},
+        React.createElement('div',{className:'form-group'},
+          React.createElement('label',null,'Email'),
+          React.createElement('input',{type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'Enter your email'})
+        ),
+        React.createElement('div',{className:'form-group'},
+          React.createElement('label',null,'Password'),
+          React.createElement('input',{type:'password',value:pass,onChange:e=>setPass(e.target.value),onKeyDown:e=>e.key==='Enter'&&submit(),placeholder:'Enter your password'})
+        ),
+        React.createElement('button',{className:'btn btn-primary login-btn',onClick:submit},'Sign in')
+      ),
+      React.createElement('div',{className:'demo-hint'},
+        React.createElement('strong',null,'Demo accounts:'),React.createElement('br',null),
+        'Admin: admin@inventory.com / admin123',React.createElement('br',null),
+        'Staff: staff@inventory.com / staff123'
+      )
+    )
+  );
+}
+
+// ── Stock bar ─────────────────────────────────────────────────
+function StockBar({stock,threshold,max}){
+  const pct=Math.min(100,Math.round((stock/(max||100))*100));
+  const low=stock<=threshold;
+  const color=low?'#E24B4A':stock<threshold*2?'#EF9F27':'#639922';
+  return React.createElement('div',{className:'stock-bar-wrap'},
+    React.createElement('div',{className:'stock-bar-bg'},
+      React.createElement('div',{className:'stock-bar-fill',style:{width:pct+'%',background:color}})
+    ),
+    React.createElement('span',{className:'stock-qty'},stock)
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────
+function Dashboard({products,sales,purchases}){
+  const totalProducts=products.length;
+  const totalValue=products.reduce((s,p)=>s+p.stock*p.costPrice,0);
+  const lowStock=products.filter(p=>p.stock<=p.threshold);
+  const totalSales=sales.reduce((s,x)=>s+x.total,0);
+  const recentSales=sales.slice(-5).reverse();
+  const barData=[
+    {label:'Electronics',val:products.filter(p=>p.category==='Electronics').reduce((s,p)=>s+p.stock,0)},
+    {label:'Furniture',val:products.filter(p=>p.category==='Furniture').reduce((s,p)=>s+p.stock,0)},
+    {label:'Stationery',val:products.filter(p=>p.category==='Stationery').reduce((s,p)=>s+p.stock,0)},
+    {label:'Accessories',val:products.filter(p=>p.category==='Accessories').reduce((s,p)=>s+p.stock,0)},
+  ];
+  const maxBar=Math.max(...barData.map(x=>x.val),1);
+  const catColors=['#185FA5','#3B6D11','#854F0B','#533AB7'];
+  return React.createElement('div',null,
+    React.createElement('div',{className:'stats-grid'},
+      React.createElement('div',{className:'stat-card'},
+        React.createElement('div',{className:'stat-icon si-blue'},React.createElement('i',{className:'ti ti-package',style:{fontSize:18}})),
+        React.createElement('div',{className:'stat-label'},'Total Products'),
+        React.createElement('div',{className:'stat-value'},totalProducts),
+        React.createElement('div',{className:'stat-sub stat-neutral'},React.createElement('i',{className:'ti ti-building-store',style:{fontSize:11}}),'across 4 categories')
+      ),
+      React.createElement('div',{className:'stat-card'},
+        React.createElement('div',{className:'stat-icon si-green'},React.createElement('i',{className:'ti ti-currency-dollar',style:{fontSize:18}})),
+        React.createElement('div',{className:'stat-label'},'Inventory Value'),
+        React.createElement('div',{className:'stat-value',style:{fontSize:18}},fmt(totalValue)),
+        React.createElement('div',{className:'stat-sub stat-up'},React.createElement('i',{className:'ti ti-trending-up',style:{fontSize:11}}),'at cost price')
+      ),
+      React.createElement('div',{className:'stat-card'},
+        React.createElement('div',{className:'stat-icon si-amber'},React.createElement('i',{className:'ti ti-alert-triangle',style:{fontSize:18}})),
+        React.createElement('div',{className:'stat-label'},'Low Stock Items'),
+        React.createElement('div',{className:'stat-value',style:{color:lowStock.length>0?'#A32D2D':'inherit'}},lowStock.length),
+        React.createElement('div',{className:'stat-sub stat-neutral'},'items below threshold')
+      ),
+      React.createElement('div',{className:'stat-card'},
+        React.createElement('div',{className:'stat-icon si-blue'},React.createElement('i',{className:'ti ti-receipt',style:{fontSize:18}})),
+        React.createElement('div',{className:'stat-label'},'Total Sales'),
+        React.createElement('div',{className:'stat-value',style:{fontSize:18}},fmt(totalSales)),
+        React.createElement('div',{className:'stat-sub stat-up'},React.createElement('i',{className:'ti ti-trending-up',style:{fontSize:11}}),sales.length+' transactions')
+      )
+    ),
+    lowStock.length>0&&React.createElement('div',{className:'alert alert-warning'},
+      React.createElement('i',{className:'ti ti-alert-triangle'}),
+      `${lowStock.length} product${lowStock.length>1?'s':''} are running low on stock: `,
+      React.createElement('strong',null,lowStock.map(p=>p.name).join(', '))
+    ),
+    React.createElement('div',{className:'chart-row'},
+      React.createElement('div',{className:'chart-card'},
+        React.createElement('div',{className:'chart-title'},'Stock by Category'),
+        React.createElement('div',{className:'bar-chart'},
+          barData.map((b,i)=>React.createElement('div',{key:b.label,className:'bar-wrap'},
+            React.createElement('div',{className:'bar-val'},b.val),
+            React.createElement('div',{className:'bar',style:{height:Math.round((b.val/maxBar)*80)+'px',background:catColors[i]}}),
+            React.createElement('div',{className:'bar-label'},b.label)
+          ))
+        )
+      ),
+      React.createElement('div',{className:'chart-card'},
+        React.createElement('div',{className:'chart-title'},'Low Stock Alert'),
+        React.createElement('div',{className:'low-stock-list'},
+          lowStock.length===0?React.createElement('div',{style:{padding:'20px 16px',color:'var(--text-muted)',fontSize:13,textAlign:'center'}},'All products are well-stocked'):
+          lowStock.map(p=>React.createElement('div',{key:p.id,className:'ls-item'},
+            React.createElement('div',null,
+              React.createElement('div',{className:'ls-name'},p.name),
+              React.createElement('div',{className:'ls-sku'},p.sku)
+            ),
+            React.createElement('div',{style:{textAlign:'right'}},
+              React.createElement('div',{className:'ls-stock'},p.stock+' '+p.unit),
+              React.createElement('div',{className:'ls-threshold'},'min: '+p.threshold)
+            )
+          ))
+        )
+      )
+    ),
+    React.createElement('div',{className:'table-card'},
+      React.createElement('div',{className:'table-toolbar'},
+        React.createElement('div',{className:'section-title'},'Recent Sales'),
+        React.createElement('span',{className:'badge badge-blue'},sales.length+' total')
+      ),
+      React.createElement('table',null,
+        React.createElement('thead',null,React.createElement('tr',null,
+          ['Date','Product','Customer','Qty','Total'].map(h=>React.createElement('th',{key:h},h))
+        )),
+        React.createElement('tbody',null,recentSales.map(s=>
+          React.createElement('tr',{key:s.id},
+            React.createElement('td',null,fmtDate(s.date)),
+            React.createElement('td',null,s.product),
+            React.createElement('td',null,s.customer),
+            React.createElement('td',null,s.qty),
+            React.createElement('td',null,React.createElement('strong',null,fmt(s.total)))
+          )
+        ))
+      )
+    )
+  );
+}
+
+// ── Products ──────────────────────────────────────────────────
+function Products({products,setProducts,showToast}){
+  const [search,setSearch]=useState('');
+  const [cat,setCat]=useState('');
+  const [modal,setModal]=useState(null);
+  const [form,setForm]=useState({});
+  const [del,setDel]=useState(null);
+  const cats=[...new Set(products.map(p=>p.category))];
+  const filtered = products.filter(p =>
+  ((p.name || '').toLowerCase().includes(search.toLowerCase()) ||
+   (p.sku || '').toLowerCase().includes(search.toLowerCase())) &&
+  (!cat || p.category === cat)
+);
+  const openAdd=()=>{setForm({name:'',sku:'',category:'Electronics',supplier:'',price:'',costPrice:'',stock:'',threshold:'',unit:'pcs'});setModal('add')};
+  const openEdit=p=>{setForm({...p});setModal('edit')};
+  const save = async () => {
+  if (!form.name || !form.sku) {
+    showToast('Name and SKU are required', 'error');
+    return;
+  }
+
+  const productData = {
+    name: form.name,
+    sku: form.sku,
+    category: form.category,
+    price: parseFloat(form.price) || 0,
+    cost_price: parseFloat(form.costPrice) || 0,
+    stock: parseInt(form.stock) || 0,
+    threshold: parseInt(form.threshold) || 0,
+    unit: form.unit,
+    supplier: parseInt(form.supplier) || 1
+  };
+
+  try {
+    if (modal === 'add') {
+
+      const response = await fetch('/api/products/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+      });
+
+      const newProduct = await response.json();
+
+      setProducts(p => [...p, newProduct]);
+
+      showToast('Product added', 'success');
+
+    } else {
+
+      const response = await fetch(`/api/products/${form.id}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+      });
+
+      const updatedProduct = await response.json();
+
+      setProducts(p =>
+        p.map(x => x.id === form.id ? updatedProduct : x)
+      );
+
+      showToast('Product updated', 'success');
+    }
+
+    setModal(null);
+
+  } catch (error) {
+    console.error(error);
+    showToast('Error saving product', 'error');
+  }
+};
+  const confirmDel = async () => {
+  try {
+
+    await fetch(`/api/products/${del.id}/`, {
+      method: 'DELETE'
+    });
+
+    setProducts(p => p.filter(x => x.id !== del.id));
+
+    showToast('Product deleted', 'success');
+
+    setDel(null);
+
+  } catch (error) {
+    console.error(error);
+    showToast('Error deleting product', 'error');
+  }
+};
+  const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  return React.createElement('div',null,
+    React.createElement('div',{className:'table-card'},
+      React.createElement('div',{className:'table-toolbar'},
+        React.createElement('div',{className:'filter-row'},
+          React.createElement('div',{className:'search-box',style:{minWidth:180}},
+            React.createElement('i',{className:'ti ti-search',style:{fontSize:14,color:'var(--text-muted)'}}),
+            React.createElement('input',{placeholder:'Search products...',value:search,onChange:e=>setSearch(e.target.value)})
+          ),
+          React.createElement('select',{className:'filter-select',value:cat,onChange:e=>setCat(e.target.value)},
+            React.createElement('option',{value:''},'All categories'),
+            cats.map(c=>React.createElement('option',{key:c,value:c},c))
+          )
+        ),
+        React.createElement('button',{className:'btn btn-primary btn-sm',onClick:openAdd},
+          React.createElement('i',{className:'ti ti-plus'}),'Add product')
+      ),
+      React.createElement('table',null,
+        React.createElement('thead',null,React.createElement('tr',null,
+          ['SKU','Product','Category','Supplier','Stock','Price','Cost','Status','Actions'].map(h=>React.createElement('th',{key:h},h))
+        )),
+        React.createElement('tbody',null,filtered.map(p=>{
+          const low=p.stock<=p.threshold;
+          return React.createElement('tr',{key:p.id},
+            React.createElement('td',null,React.createElement('code',{style:{fontSize:11,background:'var(--surface-1)',padding:'2px 6px',borderRadius:4}},p.sku)),
+            React.createElement('td',null,React.createElement('strong',null,p.name)),
+            React.createElement('td',null,React.createElement('span',{className:'badge badge-blue'},p.category)),
+            React.createElement('td',{style:{color:'var(--text-secondary)',fontSize:12}},p.supplier),
+            React.createElement('td',null,React.createElement(StockBar,{stock:p.stock,threshold:p.threshold,max:Math.max(p.stock*1.5,p.threshold*3,50)})),
+            React.createElement('td',null,fmt(p.price)),
+            React.createElement('td',{style:{color:'var(--text-secondary)'}},fmt(p.costPrice)),
+            React.createElement('td',null,React.createElement('span',{className:`badge ${low?'badge-red':'badge-green'}`},low?'Low stock':'In stock')),
+            React.createElement('td',null,
+              React.createElement('div',{className:'action-btns'},
+                React.createElement('button',{className:'btn btn-sm',onClick:()=>openEdit(p)},React.createElement('i',{className:'ti ti-edit'})),
+                React.createElement('button',{className:'btn btn-sm',style:{color:'#A32D2D'},onClick:()=>setDel(p)},React.createElement('i',{className:'ti ti-trash'}))
+              )
+            )
+          );
+        }))
+      )
+    ),
+    (modal==='add'||modal==='edit')&&React.createElement(Modal,{
+      title:modal==='add'?'Add product':'Edit product',
+      onClose:()=>setModal(null),
+      footer:React.createElement(React.Fragment,null,
+        React.createElement('button',{className:'btn',onClick:()=>setModal(null)},'Cancel'),
+        React.createElement('button',{className:'btn btn-primary',onClick:save},'Save product')
+      )
+    },
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Product name'),React.createElement('input',{value:form.name||'',onChange:e=>f('name',e.target.value),placeholder:'e.g. Wireless Keyboard'})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'SKU'),React.createElement('input',{value:form.sku||'',onChange:e=>f('sku',e.target.value),placeholder:'e.g. WK-001'}))
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Category'),
+          React.createElement('select',{value:form.category||'',onChange:e=>f('category',e.target.value)},
+            ['Electronics','Furniture','Stationery','Accessories','Other'].map(c=>React.createElement('option',{key:c,value:c},c))
+          )
+        ),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Supplier'),React.createElement('input',{value:form.supplier||'',onChange:e=>f('supplier',e.target.value),placeholder:'Supplier name'}))
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Selling price ($)'),React.createElement('input',{type:'number',value:form.price||'',onChange:e=>f('price',e.target.value),placeholder:'0.00'})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Cost price ($)'),React.createElement('input',{type:'number',value:form.costPrice||'',onChange:e=>f('costPrice',e.target.value),placeholder:'0.00'}))
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Current stock'),React.createElement('input',{type:'number',value:form.stock||'',onChange:e=>f('stock',e.target.value),placeholder:'0'})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Low stock threshold'),React.createElement('input',{type:'number',value:form.threshold||'',onChange:e=>f('threshold',e.target.value),placeholder:'0'}))
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Unit'),
+          React.createElement('select',{value:form.unit||'pcs',onChange:e=>f('unit',e.target.value)},
+            ['pcs','units','reams','packs','boxes','kg','liters'].map(u=>React.createElement('option',{key:u,value:u},u))
+          )
+        ),
+        React.createElement('div',{className:'form-group'})
+      )
+    ),
+    del&&React.createElement(Modal,{title:'Delete product',onClose:()=>setDel(null),footer:
+      React.createElement(React.Fragment,null,
+        React.createElement('button',{className:'btn',onClick:()=>setDel(null)},'Cancel'),
+        React.createElement('button',{className:'btn btn-danger',onClick:confirmDel},'Delete')
+      )
+    },
+      React.createElement('p',{style:{fontSize:14}},`Are you sure you want to delete "${del.name}"? This action cannot be undone.`)
+    )
+  );
+}
+
+// ── Suppliers ─────────────────────────────────────────────────
+function Suppliers({suppliers,setSuppliers,showToast}){
+  const [modal,setModal]=useState(null);
+  const [form,setForm]=useState({});
+  const [del,setDel]=useState(null);
+  const openAdd=()=>{setForm({name:'',contact:'',phone:'',city:''});setModal('add')};
+  const openEdit=s=>{setForm({...s});setModal('edit')};
+  const save=()=>{
+    if(!form.name){showToast('Supplier name required','error');return;}
+    if(modal==='add')setSuppliers(p=>[...p,{...form,id:Date.now()}]);
+    else setSuppliers(p=>p.map(x=>x.id===form.id?{...form}:x));
+    showToast(modal==='add'?'Supplier added':'Supplier updated','success');setModal(null);
+  };
+  const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  return React.createElement('div',null,
+    React.createElement('div',{className:'table-card'},
+      React.createElement('div',{className:'table-toolbar'},
+        React.createElement('span',{className:'badge badge-blue'},suppliers.length+' suppliers'),
+        React.createElement('button',{className:'btn btn-primary btn-sm',onClick:openAdd},React.createElement('i',{className:'ti ti-plus'}),'Add supplier')
+      ),
+      React.createElement('table',null,
+        React.createElement('thead',null,React.createElement('tr',null,
+          ['Supplier Name','Contact Email','Phone','City','Actions'].map(h=>React.createElement('th',{key:h},h))
+        )),
+        React.createElement('tbody',null,suppliers.map(s=>
+          React.createElement('tr',{key:s.id},
+            React.createElement('td',null,React.createElement('strong',null,s.name)),
+            React.createElement('td',{style:{color:'var(--text-accent,#185FA5)'}},s.contact),
+            React.createElement('td',null,s.phone),
+            React.createElement('td',null,s.city),
+            React.createElement('td',null,
+              React.createElement('div',{className:'action-btns'},
+                React.createElement('button',{className:'btn btn-sm',onClick:()=>openEdit(s)},React.createElement('i',{className:'ti ti-edit'})),
+                React.createElement('button',{className:'btn btn-sm',style:{color:'#A32D2D'},onClick:()=>setDel(s)},React.createElement('i',{className:'ti ti-trash'}))
+              )
+            )
+          )
+        ))
+      )
+    ),
+    (modal==='add'||modal==='edit')&&React.createElement(Modal,{title:modal==='add'?'Add supplier':'Edit supplier',onClose:()=>setModal(null),footer:
+      React.createElement(React.Fragment,null,
+        React.createElement('button',{className:'btn',onClick:()=>setModal(null)},'Cancel'),
+        React.createElement('button',{className:'btn btn-primary',onClick:save},'Save')
+      )
+    },
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Supplier name'),React.createElement('input',{value:form.name||'',onChange:e=>f('name',e.target.value),placeholder:'Company name'})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'City'),React.createElement('input',{value:form.city||'',onChange:e=>f('city',e.target.value),placeholder:'City'}))
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Contact email'),React.createElement('input',{type:'email',value:form.contact||'',onChange:e=>f('contact',e.target.value),placeholder:'orders@company.com'})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Phone'),React.createElement('input',{value:form.phone||'',onChange:e=>f('phone',e.target.value),placeholder:'+1-555-0000'}))
+      )
+    ),
+    del&&React.createElement(Modal,{title:'Remove supplier',onClose:()=>setDel(null),footer:
+      React.createElement(React.Fragment,null,
+        React.createElement('button',{className:'btn',onClick:()=>setDel(null)},'Cancel'),
+        React.createElement('button',{className:'btn btn-danger',onClick:()=>{setSuppliers(p=>p.filter(x=>x.id!==del.id));showToast('Supplier removed','success');setDel(null)}},'Remove')
+      )
+    },
+      React.createElement('p',{style:{fontSize:14}},`Remove "${del.name}" from suppliers?`)
+    )
+  );
+}
+
+// ── Purchases ─────────────────────────────────────────────────
+function Purchases({purchases,setPurchases,products,setProducts,suppliers,showToast}){
+  const [modal,setModal]=useState(false);
+  const [form,setForm]=useState({date:'',supplier:'',product:'',qty:'',unitCost:'',status:'pending'});
+  const save=()=>{
+    if(!form.product||!form.qty){showToast('Product and quantity required','error');return;}
+    const qty=parseInt(form.qty)||0,cost=parseFloat(form.unitCost)||0;
+    const rec={...form,id:Date.now(),qty,unitCost:cost,total:qty*cost};
+    setPurchases(p=>[rec,...p]);
+    if(rec.status==='received'){setProducts(p=>p.map(x=>x.name===rec.product?{...x,stock:x.stock+qty}:x));}
+    showToast('Purchase recorded','success');setModal(false);
+  };
+  const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  const statusBadge=s=>s==='received'?'badge-green':s==='transit'?'badge-amber':'badge-gray';
+  return React.createElement('div',null,
+    React.createElement('div',{className:'table-card'},
+      React.createElement('div',{className:'table-toolbar'},
+        React.createElement('span',{className:'badge badge-blue'},purchases.length+' records'),
+        React.createElement('button',{className:'btn btn-primary btn-sm',onClick:()=>{setForm({date:new Date().toISOString().slice(0,10),supplier:'',product:'',qty:'',unitCost:'',status:'pending'});setModal(true)}},
+          React.createElement('i',{className:'ti ti-plus'}),'Record purchase')
+      ),
+      React.createElement('table',null,
+        React.createElement('thead',null,React.createElement('tr',null,
+          ['Date','Supplier','Product','Qty','Unit Cost','Total','Status'].map(h=>React.createElement('th',{key:h},h))
+        )),
+        React.createElement('tbody',null,purchases.map(p=>
+          React.createElement('tr',{key:p.id},
+            React.createElement('td',null,fmtDate(p.date)),
+            React.createElement('td',null,p.supplier),
+            React.createElement('td',null,p.product),
+            React.createElement('td',null,p.qty),
+            React.createElement('td',null,fmt(p.unitCost)),
+            React.createElement('td',null,React.createElement('strong',null,fmt(p.total))),
+            React.createElement('td',null,React.createElement('span',{className:`badge ${statusBadge(p.status)}`},p.status))
+          )
+        ))
+      )
+    ),
+    modal&&React.createElement(Modal,{title:'Record purchase',onClose:()=>setModal(false),footer:
+      React.createElement(React.Fragment,null,
+        React.createElement('button',{className:'btn',onClick:()=>setModal(false)},'Cancel'),
+        React.createElement('button',{className:'btn btn-primary',onClick:save},'Save purchase')
+      )
+    },
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Date'),React.createElement('input',{type:'date',value:form.date,onChange:e=>f('date',e.target.value)})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Supplier'),
+          React.createElement('select',{value:form.supplier,onChange:e=>f('supplier',e.target.value)},
+            React.createElement('option',{value:''},'Select supplier'),
+            suppliers.map(s=>React.createElement('option',{key:s.id,value:s.name},s.name))
+          )
+        )
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Product'),
+          React.createElement('select',{value:form.product,onChange:e=>{const p=products.find(x=>x.name===e.target.value);f('product',e.target.value);if(p)f('unitCost',p.costPrice);}},
+            React.createElement('option',{value:''},'Select product'),
+            products.map(p=>React.createElement('option',{key:p.id,value:p.name},p.name))
+          )
+        ),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Quantity'),React.createElement('input',{type:'number',value:form.qty,onChange:e=>f('qty',e.target.value),placeholder:'0'}))
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Unit cost ($)'),React.createElement('input',{type:'number',value:form.unitCost,onChange:e=>f('unitCost',e.target.value),placeholder:'0.00'})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Total'),React.createElement('input',{readOnly:true,value:form.qty&&form.unitCost?fmt(parseInt(form.qty||0)*parseFloat(form.unitCost||0)):'',style:{background:'var(--surface-0)'}}))
+      ),
+      React.createElement('div',{className:'form-row single'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Status'),
+          React.createElement('select',{value:form.status,onChange:e=>f('status',e.target.value)},
+            ['pending','transit','received'].map(s=>React.createElement('option',{key:s,value:s},s.charAt(0).toUpperCase()+s.slice(1)))
+          )
+        )
+      )
+    )
+  );
+}
+
+// ── Sales ─────────────────────────────────────────────────────
+function Sales({sales,setSales,products,setProducts,showToast}){
+  const [modal,setModal]=useState(false);
+  const [form,setForm]=useState({date:'',product:'',qty:'',unitPrice:'',customer:''});
+  const save=()=>{
+    if(!form.product||!form.qty){showToast('Product and quantity required','error');return;}
+    const p=products.find(x=>x.name===form.product);
+    const qty=parseInt(form.qty)||0;
+    if(p&&p.stock<qty){showToast(`Only ${p.stock} units available`,'error');return;}
+    const price=parseFloat(form.unitPrice)||0;
+    setSales(s=>[...s,{...form,id:Date.now(),qty,unitPrice:price,total:qty*price}]);
+    if(p)setProducts(ps=>ps.map(x=>x.name===form.product?{...x,stock:x.stock-qty}:x));
+    showToast('Sale recorded','success');setModal(false);
+  };
+  const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  return React.createElement('div',null,
+    React.createElement('div',{className:'table-card'},
+      React.createElement('div',{className:'table-toolbar'},
+        React.createElement('div',{className:'filter-row'},
+          React.createElement('span',{className:'badge badge-green'},sales.length+' transactions'),
+          React.createElement('span',{className:'badge badge-blue'},'Total: '+fmt(sales.reduce((s,x)=>s+x.total,0)))
+        ),
+        React.createElement('button',{className:'btn btn-primary btn-sm',onClick:()=>{setForm({date:new Date().toISOString().slice(0,10),product:'',qty:'',unitPrice:'',customer:''});setModal(true)}},
+          React.createElement('i',{className:'ti ti-plus'}),'Record sale')
+      ),
+      React.createElement('table',null,
+        React.createElement('thead',null,React.createElement('tr',null,
+          ['Date','Customer','Product','Qty','Unit Price','Total','Profit'].map(h=>React.createElement('th',{key:h},h))
+        )),
+        React.createElement('tbody',null,sales.map(s=>{
+          const prod=products.find(p=>p.name===s.product);
+          const profit=prod?((s.unitPrice-prod.costPrice)*s.qty):0;
+          return React.createElement('tr',{key:s.id},
+            React.createElement('td',null,fmtDate(s.date)),
+            React.createElement('td',null,s.customer||'—'),
+            React.createElement('td',null,s.product),
+            React.createElement('td',null,s.qty),
+            React.createElement('td',null,fmt(s.unitPrice)),
+            React.createElement('td',null,React.createElement('strong',null,fmt(s.total))),
+            React.createElement('td',null,React.createElement('span',{style:{color:profit>=0?'#3B6D11':'#A32D2D',fontWeight:500}},profit>=0?'+':'')+fmt(profit))
+          );
+        }))
+      )
+    ),
+    modal&&React.createElement(Modal,{title:'Record sale',onClose:()=>setModal(false),footer:
+      React.createElement(React.Fragment,null,
+        React.createElement('button',{className:'btn',onClick:()=>setModal(false)},'Cancel'),
+        React.createElement('button',{className:'btn btn-primary',onClick:save},'Save sale')
+      )
+    },
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Date'),React.createElement('input',{type:'date',value:form.date,onChange:e=>f('date',e.target.value)})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Customer'),React.createElement('input',{value:form.customer,onChange:e=>f('customer',e.target.value),placeholder:'Customer name or company'}))
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Product'),
+          React.createElement('select',{value:form.product,onChange:e=>{const p=products.find(x=>x.name===e.target.value);f('product',e.target.value);if(p)f('unitPrice',p.price);}},
+            React.createElement('option',{value:''},'Select product'),
+            products.filter(p=>p.stock>0).map(p=>React.createElement('option',{key:p.id,value:p.name},`${p.name} (${p.stock} in stock)`))
+          )
+        ),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Quantity'),React.createElement('input',{type:'number',value:form.qty,onChange:e=>f('qty',e.target.value),placeholder:'0'}))
+      ),
+      React.createElement('div',{className:'form-row'},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Unit price ($)'),React.createElement('input',{type:'number',value:form.unitPrice,onChange:e=>f('unitPrice',e.target.value),placeholder:'0.00'})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,'Total'),React.createElement('input',{readOnly:true,value:form.qty&&form.unitPrice?fmt(parseInt(form.qty||0)*parseFloat(form.unitPrice||0)):'',style:{background:'var(--surface-0)'}}))
+      )
+    )
+  );
+}
+
+// ── Reports ───────────────────────────────────────────────────
+function Reports({products,sales,purchases}){
+  const totalInvValue=products.reduce((s,p)=>s+p.stock*p.costPrice,0);
+  const totalRetailValue=products.reduce((s,p)=>s+p.stock*p.price,0);
+  const totalSalesRev=sales.reduce((s,x)=>s+x.total,0);
+  const totalPurchaseCost=purchases.filter(x=>x.status==='received').reduce((s,x)=>s+x.total,0);
+  const grossProfit=sales.reduce((s,sale)=>{const p=products.find(x=>x.name===sale.product);return s+(p?(sale.unitPrice-p.costPrice)*sale.qty:0)},0);
+  const lowStock=products.filter(p=>p.stock<=p.threshold);
+  const topProducts=[...sales].reduce((acc,s)=>{acc[s.product]=(acc[s.product]||0)+s.total;return acc},{});
+  const topList=Object.entries(topProducts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const catStock=products.reduce((acc,p)=>{acc[p.category]=(acc[p.category]||{qty:0,val:0});acc[p.category].qty+=p.stock;acc[p.category].val+=p.stock*p.costPrice;return acc},{});
+  return React.createElement('div',null,
+    React.createElement('div',{className:'alert alert-warning',style:{marginBottom:20}},
+      React.createElement('i',{className:'ti ti-info-circle'}),
+      'Report data is computed from current records. In production, this connects to Django REST API endpoints.'
+    ),
+    React.createElement('div',{className:'report-grid'},
+      React.createElement('div',{className:'report-card'},
+        React.createElement('h4',null,'Inventory summary'),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Total products'),React.createElement('span',{className:'report-val'},products.length)),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Stock value (cost)'),React.createElement('span',{className:'report-val'},fmt(totalInvValue))),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Stock value (retail)'),React.createElement('span',{className:'report-val'},fmt(totalRetailValue))),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Potential margin'),React.createElement('span',{className:'report-val',style:{color:'#3B6D11'}},fmt(totalRetailValue-totalInvValue))),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Low stock items'),React.createElement('span',{className:'report-val',style:{color:lowStock.length>0?'#A32D2D':'inherit'}},lowStock.length))
+      ),
+      React.createElement('div',{className:'report-card'},
+        React.createElement('h4',null,'Sales & profit'),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Total revenue'),React.createElement('span',{className:'report-val'},fmt(totalSalesRev))),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Total purchases'),React.createElement('span',{className:'report-val'},fmt(totalPurchaseCost))),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Gross profit'),React.createElement('span',{className:'report-val',style:{color:grossProfit>=0?'#3B6D11':'#A32D2D'}},fmt(grossProfit))),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Profit margin'),React.createElement('span',{className:'report-val',style:{color:'#3B6D11'}},totalSalesRev>0?Math.round((grossProfit/totalSalesRev)*100)+'%':'—')),
+        React.createElement('div',{className:'report-row'},React.createElement('span',{className:'report-key'},'Transactions'),React.createElement('span',{className:'report-val'},sales.length))
+      ),
+      React.createElement('div',{className:'report-card'},
+        React.createElement('h4',null,'Top products by revenue'),
+        topList.length===0?React.createElement('p',{style:{fontSize:13,color:'var(--text-muted)'}},'-'):
+        topList.map(([name,val])=>React.createElement('div',{key:name,className:'report-row'},
+          React.createElement('span',{className:'report-key',style:{maxWidth:160,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},name),
+          React.createElement('span',{className:'report-val'},fmt(val))
+        ))
+      ),
+      React.createElement('div',{className:'report-card'},
+        React.createElement('h4',null,'Stock by category'),
+        Object.entries(catStock).map(([cat,d])=>React.createElement('div',{key:cat,className:'report-row'},
+          React.createElement('span',{className:'report-key'},cat),
+          React.createElement('span',{className:'report-val'},d.qty+' units · '+fmt(d.val))
+        ))
+      )
+    )
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────
+function App(){
+  const [user,setUser]=useState(null);
+  const [page,setPage]=useState('dashboard');
+  const [products,setProducts] = useState([]);
+  const [suppliers,setSuppliers]=useStore('inv_suppliers',INIT_SUPPLIERS);
+  const [purchases,setPurchases]=useStore('inv_purchases',INIT_PURCHASES);
+  const [sales,setSales]=useStore('inv_sales',INIT_SALES);
+  const [toast,setToast]=useState(null);
+  const showToast=useCallback((msg,type='success')=>{setToast({msg,type,id:Date.now()})},[]);
+  useEffect(() => {
+  fetch('/api/products/')
+    .then(r => r.json())
+    .then(data => {
+
+      const mapped = data.map(p => ({
+        ...p,
+        costPrice: p.cost_price
+      }));
+
+      setProducts(mapped);
+
+      console.log(mapped);
+
+    });
+}, []);
+
+  if(!user)return React.createElement(Login,{onLogin:setUser});
+
+  const navItems=[
+    {id:'dashboard',icon:'layout-dashboard',label:'Dashboard'},
+    {id:'products',icon:'package',label:'Products'},
+    {id:'suppliers',icon:'building-store',label:'Suppliers'},
+    {id:'purchases',icon:'truck',label:'Purchases'},
+    {id:'sales',icon:'receipt',label:'Sales'},
+    {id:'reports',icon:'chart-bar',label:'Reports'},
+  ];
+  const titles={dashboard:'Dashboard',products:'Products',suppliers:'Suppliers',purchases:'Purchases',sales:'Sales',reports:'Reports'};
+
+  return React.createElement('div',{className:'app'},
+    React.createElement('div',{className:'sidebar'},
+      React.createElement('div',{className:'logo'},
+        React.createElement('div',{className:'logo-title'},
+          React.createElement('div',{className:'logo-icon'},React.createElement('i',{className:'ti ti-package'})),
+          'InvenFlow'
+        ),
+        React.createElement('div',{className:'logo-sub'},'Smart Inventory')
+      ),
+      React.createElement('div',{className:'nav'},
+        React.createElement('div',{className:'nav-section'},'Menu'),
+        navItems.map(n=>React.createElement('div',{key:n.id,className:`nav-item ${page===n.id?'active':''}`,onClick:()=>setPage(n.id)},
+          React.createElement('i',{className:`ti ti-${n.icon}`}),n.label
+        ))
+      ),
+      React.createElement('div',{className:'user-area'},
+        React.createElement('div',{className:'user-card'},
+          React.createElement('div',{className:'avatar'},user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)),
+          React.createElement('div',{className:'user-info'},
+            React.createElement('div',{className:'name'},user.name),
+            React.createElement('div',{className:'role'},user.role)
+          )
+        ),
+        React.createElement('button',{className:'btn btn-sm',style:{width:'100%',justifyContent:'center',marginTop:4},onClick:()=>setUser(null)},
+          React.createElement('i',{className:'ti ti-logout'}),'Sign out'
+        )
+      )
+    ),
+    React.createElement('div',{className:'main'},
+      React.createElement('div',{className:'topbar'},
+        React.createElement('div',{className:'page-title'},titles[page]),
+        React.createElement('div',{className:'topbar-actions'},
+          React.createElement('div',{className:'badge badge-green'},React.createElement('i',{className:'ti ti-circle-filled',style:{fontSize:8,marginRight:4}}),'System online'),
+          React.createElement('span',{style:{fontSize:12,color:'var(--text-muted)'}},new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}))
+        )
+      ),
+      React.createElement('div',{className:'content'},
+        page==='dashboard'&&React.createElement(Dashboard,{products,sales,purchases}),
+        page==='products'&&React.createElement(Products,{products,setProducts,showToast}),
+        page==='suppliers'&&React.createElement(Suppliers,{suppliers,setSuppliers,showToast}),
+        page==='purchases'&&React.createElement(Purchases,{purchases,setPurchases,products,setProducts,suppliers,showToast}),
+        page==='sales'&&React.createElement(Sales,{sales,setSales,products,setProducts,showToast}),
+        page==='reports'&&React.createElement(Reports,{products,sales,purchases})
+      )
+    ),
+    toast&&React.createElement(Toast,{key:toast.id,msg:toast.msg,type:toast.type,onDone:()=>setToast(null)})
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
